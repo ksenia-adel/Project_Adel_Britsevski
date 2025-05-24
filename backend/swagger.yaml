@@ -1,0 +1,972 @@
+openapi: 3.0.0
+info:
+  title: Adel Britševski Project API
+  version: 1.0.0
+  description: REST API documentation for the backend services
+
+servers:
+  - url: http://localhost:3001/api
+    description: Local Development Server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Admin:
+      type: object
+      properties:
+        adminid:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        userid:
+          type: string
+
+    Doctor:
+      type: object
+      properties:
+        doctorid:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        specialty:
+          type: string
+        userid:
+          type: string
+        adminid:
+          type: string'
+  
+    Patient:
+        type: object
+        properties:
+          patientid:
+            type: string
+          firstname:
+            type: string
+          lastname:
+            type: string
+          email:
+            type: string
+          phone:
+            type: string
+          personalcode:
+            type: string
+          address:
+            type: string
+          userid:
+            type: string
+    
+    Booking:
+      type: object
+      properties:
+        bookingid:
+          type: string
+        patientid:
+          type: string
+        servicecatalogid:
+          type: string
+        scheduleid:
+          type: string
+        ispaid:
+          type: boolean
+
+    DoctorService:
+      type: object
+      properties:
+        doctorserviceid:
+          type: string
+        doctorid:
+          type: string
+        servicecatalogid:
+          type: string
+
+    Schedule:
+      type: object
+      properties:
+        scheduleid:
+          type: string
+        doctorid:
+          type: string
+        date:
+          type: string
+          format: date
+        starttime:
+          type: string
+        endtime:
+          type: string
+
+    Service:
+      type: object
+      properties:
+        servicecatalogid:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        duration:
+          type: integer
+        price:
+          type: number
+        adminid:
+          type: string
+
+    Statistics:
+      type: object
+      properties:
+        users:
+          type: integer
+        admins:
+          type: integer
+        doctors:
+          type: integer
+        patients:
+          type: integer
+        bookings:
+          type: integer
+
+    User:
+      type: object
+      properties:
+        userid:
+          type: integer
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          description: Hashed password
+        role:
+          type: string
+          enum: [admin, doctor, patient]
+
+
+# Register/Login
+paths:
+  /auth/register:
+    post:
+      summary: Register a new patient user
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - firstname
+                - lastname
+                - phone
+                - address
+                - personalcode
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                firstname:
+                  type: string
+                lastname:
+                  type: string
+                phone:
+                  type: string
+                address:
+                  type: string
+                personalcode:
+                  type: string
+      responses:
+        '201':
+          description: Patient registered successfully
+        '400':
+          description: User already exists
+        '500':
+          description: Server error
+
+  /auth/login:
+    post:
+      summary: Log in a user (admin, doctor, or patient)
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    type: object
+                    properties:
+                      userid:
+                        type: string
+                      email:
+                        type: string
+                      role:
+                        type: string
+        '401':
+          description: Invalid credentials
+        '404':
+          description: User not found
+        '500':
+          description: Server error
+
+# Admin
+  /admins:
+    post:
+      summary: Create a new admin
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - firstname
+                - lastname
+                - email
+                - phone
+              properties:
+                firstname:
+                  type: string
+                lastname:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                phone:
+                  type: string
+      responses:
+        '201':
+          description: Admin created successfully
+        '400':
+          description: User with this email already exists or invalid input
+        '500':
+          description: Server error
+
+    get:
+      summary: Get all admins
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of admins
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Admin'
+        '500':
+          description: Failed to retrieve admins
+
+  /admins/{id}:
+    put:
+      summary: Update an admin
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstname:
+                  type: string
+                lastname:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                phone:
+                  type: string
+      responses:
+        '200':
+          description: Admin updated successfully
+        '400':
+          description: Email is already used by another user
+        '404':
+          description: Admin not found
+        '500':
+          description: Update failed
+
+    delete:
+      summary: Delete an admin and associated user
+      tags: [Admin]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Admin and associated user deleted
+        '404':
+          description: Admin not found
+        '500':
+          description: Delete failed
+
+# Doctor
+
+  /doctors:
+    post:
+      summary: Create a new doctor
+      tags: [Doctor]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - firstname
+                - lastname
+                - email
+                - phone
+                - specialty
+              properties:
+                firstname:
+                  type: string
+                lastname:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                phone:
+                  type: string
+                specialty:
+                  type: string
+      responses:
+        '201':
+          description: Doctor created successfully
+        '500':
+          description: Doctor creation failed
+
+    get:
+      summary: Get all doctors
+      tags: [Doctor]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of doctors
+
+  /doctors/{id}:
+    put:
+      summary: Update a doctor
+      tags: [Doctor]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstname:
+                  type: string
+                lastname:
+                  type: string
+                email:
+                  type: string
+                phone:
+                  type: string
+                specialty:
+                  type: string
+      responses:
+        '200':
+          description: Doctor updated
+        '404':
+          description: Doctor not found
+        '500':
+          description: Update failed
+
+    delete:
+      summary: Delete a doctor and associated user
+      tags: [Doctor]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Doctor deleted
+        '404':
+          description: Doctor not found
+        '500':
+          description: Delete failed
+
+  /doctors/bookings:
+    get:
+      summary: Get bookings for the logged-in doctor
+      tags: [Doctor]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of doctor bookings
+        '404':
+          description: Doctor not found
+        '500':
+          description: Failed to retrieve bookings
+
+# Patient
+
+  /patients:
+      get:
+        summary: Get all patients
+        tags: [Patient]
+        security:
+          - bearerAuth: []
+        responses:
+          '200':
+            description: List of patients with user data
+          '500':
+            description: Failed to fetch patients
+
+  /patients/{id}:
+      put:
+        summary: Update a patient and their associated user email
+        tags: [Patient]
+        security:
+          - bearerAuth: []
+        parameters:
+          - name: id
+            in: path
+            required: true
+            schema:
+              type: string
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  firstname:
+                    type: string
+                  lastname:
+                    type: string
+                  email:
+                    type: string
+                    format: email
+                  phone:
+                    type: string
+                  personalcode:
+                    type: string
+                  address:
+                    type: string
+        responses:
+          '200':
+            description: Patient updated
+          '404':
+            description: Patient not found
+          '500':
+            description: Update failed
+
+      delete:
+        summary: Delete a patient and associated user
+        tags: [Patient]
+        security:
+          - bearerAuth: []
+        parameters:
+          - name: id
+            in: path
+            required: true
+            schema:
+              type: string
+        responses:
+          '200':
+            description: Patient deleted
+          '404':
+            description: Patient not found
+          '500':
+            description: Failed to delete patient
+
+  /bookings:
+    post:
+      summary: Create a new booking
+      tags: [Booking]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - servicecatalogid
+                - scheduleid
+              properties:
+                servicecatalogid:
+                  type: string
+                scheduleid:
+                  type: string
+      responses:
+        '201':
+          description: Booking created
+        '400':
+          description: Time slot too short or already booked
+        '404':
+          description: Patient, service, or schedule not found
+        '500':
+          description: Booking failed
+
+    get:
+      summary: Get bookings for the logged-in patient
+      tags: [Booking]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of bookings
+        '404':
+          description: Patient not found
+        '500':
+          description: Failed to fetch bookings
+
+  /bookings/{id}:
+    delete:
+      summary: Cancel a booking
+      tags: [Booking]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Booking cancelled
+        '403':
+          description: Forbidden – can't cancel another patient's booking
+        '404':
+          description: Booking or patient not found
+        '500':
+          description: Cancellation failed
+
+  /bookings/{id}/pay:
+    put:
+      summary: Mark a booking as paid
+      tags: [Booking]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Booking marked as paid
+        '400':
+          description: Already paid
+        '403':
+          description: Forbidden – not your booking
+        '404':
+          description: Booking or patient not found
+        '500':
+          description: Payment update failed
+
+  /bookings/doctor:
+    get:
+      summary: Get bookings for the logged-in doctor
+      tags: [Booking]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Doctor's bookings with related patient and service info
+        '400':
+          description: Missing user ID in token
+        '404':
+          description: Doctor not found
+        '500':
+          description: Failed to fetch doctor bookings
+
+  /doctorservices:
+    post:
+      summary: Link a service to the logged-in doctor
+      tags: [DoctorService]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - servicecatalogid
+              properties:
+                servicecatalogid:
+                  type: string
+      responses:
+        '201':
+          description: Service linked to doctor
+        '400':
+          description: Service already linked
+        '404':
+          description: Doctor not found
+        '500':
+          description: Failed to link service
+
+  /doctorservices/my:
+    get:
+      summary: Get services linked to the logged-in doctor
+      tags: [DoctorService]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of linked services
+        '404':
+          description: Doctor not found
+        '500':
+          description: Failed to fetch services
+
+  /doctorservices/{doctorid}:
+    get:
+      summary: Get services for a specific doctor by ID
+      tags: [DoctorService]
+      parameters:
+        - name: doctorid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of services for the doctor
+        '500':
+          description: Failed to fetch doctor services
+
+  /doctorservices/{id}:
+    delete:
+      summary: Unlink a doctor service (only if it belongs to the logged-in doctor)
+      tags: [DoctorService]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Service unlinked successfully
+        '403':
+          description: Access denied
+        '404':
+          description: Doctor or service not found
+        '500':
+          description: Failed to unlink service
+
+  /doctorservices/available/{servicecatalogid}:
+    get:
+      summary: Get available schedule slots for a specific service
+      tags: [DoctorService]
+      parameters:
+        - name: servicecatalogid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of available slots with doctor info
+        '500':
+          description: Failed to load available slots        
+
+  /schedules:
+    post:
+      summary: Create a new schedule slot (doctor only)
+      tags: [Schedule]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - date
+                - starttime
+                - endtime
+              properties:
+                date:
+                  type: string
+                  format: date
+                starttime:
+                  type: string
+                  example: "09:00"
+                endtime:
+                  type: string
+                  example: "09:30"
+      responses:
+        '201':
+          description: Slot created
+        '404':
+          description: Doctor not found
+        '500':
+          description: Failed to create slot
+
+    get:
+      summary: Get schedule of the logged-in doctor
+      tags: [Schedule]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Doctor’s schedule
+        '404':
+          description: Doctor not found
+        '500':
+          description: Failed to retrieve schedule
+
+  /schedules/{id}:
+    delete:
+      summary: Delete a schedule slot (doctor only)
+      tags: [Schedule]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Slot deleted
+        '403':
+          description: Access denied
+        '404':
+          description: Doctor or slot not found
+        '500':
+          description: Failed to delete slot
+
+  /schedules/available-dates:
+    get:
+      summary: Get available dates for booking
+      tags: [Schedule]
+      parameters:
+        - name: serviceId
+          in: query
+          schema:
+            type: string
+        - name: doctorId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of available dates
+        '500':
+          description: Failed to retrieve dates
+
+  /schedules/doctors/{doctorid}:
+    get:
+      summary: Get available schedule slots for a specific doctor
+      tags: [Schedule]
+      parameters:
+        - name: doctorid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Available slots for the doctor
+        '500':
+          description: Failed to retrieve doctor’s schedule        
+
+  /services:
+    post:
+      summary: Create a new service (admin only)
+      tags: [Service]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - description
+                - duration
+                - price
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                duration:
+                  type: integer
+                  description: Duration in minutes
+                price:
+                  type: number
+                  format: float
+      responses:
+        '201':
+          description: Service created
+        '500':
+          description: Failed to create service
+
+    get:
+      summary: Get all services
+      tags: [Service]
+      responses:
+        '200':
+          description: List of services
+        '500':
+          description: Failed to fetch services
+
+  /services/{id}:
+    put:
+      summary: Update a service (admin only)
+      tags: [Service]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                duration:
+                  type: integer
+                price:
+                  type: number
+      responses:
+        '200':
+          description: Service updated
+        '500':
+          description: Failed to update service
+
+    delete:
+      summary: Delete a service (admin only)
+      tags: [Service]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Service deleted
+        '500':
+          description: Failed to delete service        
+
+  /statistics/refresh:
+    get:
+      summary: Refresh and retrieve general statistics
+      tags: [Statistics]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Statistics successfully retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: integer
+                  admins:
+                    type: integer
+                  doctors:
+                    type: integer
+                  patients:
+                    type: integer
+                  bookings:
+                    type: integer
+        '500':
+          description: Failed to refresh statistics        
