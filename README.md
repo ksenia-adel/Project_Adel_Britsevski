@@ -215,8 +215,7 @@ OR Register new user
 <img src="https://github.com/user-attachments/assets/d7dcf54e-7d81-4102-b6d8-41932de6c5c5" width="600"/>
 
 #### System Statistics
-<img src="![image](https://github.com/user-attachments/assets/f777dc08-9b37-457a-8218-7a6ddf95ab2f)
-" width="600"/>
+<img src="https://github.com/user-attachments/assets/f777dc08-9b37-457a-8218-7a6ddf95ab2f" width="600"/>
 
 ### Doctor Pages
 
