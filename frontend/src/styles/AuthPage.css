@@ -1,0 +1,112 @@
+.auth-header {
+  margin-right: 2rem;
+  text-align: center;
+  max-width: 300px;
+}
+
+.auth-page {
+  background-image: url('./font.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 1.3rem;
+}
+
+.auth-card {
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 16px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  font-size: 1.3rem;
+}
+
+.auth-tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+
+.auth-tabs button {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  padding: 0.5rem 1.5rem;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: 0.2s ease;
+}
+
+.auth-tabs button.active {
+  border-color: #ff1010;
+  font-weight: bold;
+  color: #ff1010;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  font-size: 1.3rem;
+}
+
+.auth-form input {
+  padding: 1rem;
+  font-size: 1.3rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.auth-form button {
+  padding: 1rem;
+  font-size: 1.3rem;
+  background-color: #e31b09;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.auth-form button:hover {
+  background-color: #c91407;
+}
+
+.auth-error {
+  background-color: #ffdddd;
+  color: #d8000c;
+  padding: 0.8rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-size: 1.3rem;
+}
+
+.password-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.toggle-password {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.toggle-password:hover {
+  background-color: #e0e0e0;
+}
