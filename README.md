@@ -197,7 +197,9 @@ OR Register new user
 ### Pages for Admins
 
 #### Login Page
-<img src="https://github.com/user-attachments/assets/8fc2dd37-06d0-465f-a067-2ba343b615dd" width="600"/>
+
+
+<img src="https://github.com/user-attachments/assets/0a376974-303f-4b61-83f4-0b44217c25dd" width="600"/>
 
 #### Register Page
 <img src="https://github.com/user-attachments/assets/cbb484b6-d33a-4278-946d-fa0b67159bce" width="600"/>
